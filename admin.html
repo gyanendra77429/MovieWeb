@@ -13,7 +13,7 @@
             padding: 25px;
             border-radius: 8px;
         }
-        .admin-form input, .admin-form select {
+        .admin-form input {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -21,6 +21,23 @@
             border: 1px solid #444;
             color: #fff;
             border-radius: 5px;
+        }
+        .genre-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 15px 0;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .genre-checkboxes label {
+            font-size: 14px;
+            color: #ddd;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         .admin-form button {
             width: 100%;
@@ -46,13 +63,19 @@
             <h2>Add New Movie</h2>
             <input type="text" id="title" placeholder="Movie Title (e.g. Avatar 2)">
             <input type="text" id="year" placeholder="Release Year (e.g. 2024)">
-            <select id="genre">
-                <option value="Action">Action</option>
-                <option value="Sci-Fi">Sci-Fi</option>
-                <option value="Drama">Drama</option>
-                <option value="Horror">Horror</option>
-            </select>
-            <input type="url" id="poster" placeholder="Poster Image URL">
+            
+            <label style="color:#aaa; font-size:14px;">Select Genres (Multiple Choose Karein):</label>
+            <div class="genre-checkboxes">
+                <label><input type="checkbox" name="genreOpt" value="Action"> Action</label>
+                <label><input type="checkbox" name="genreOpt" value="Sci-Fi"> Sci-Fi</label>
+                <label><input type="checkbox" name="genreOpt" value="Drama"> Drama</label>
+                <label><input type="checkbox" name="genreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="genreOpt" value="Comedy"> Comedy</label>
+                <label><input type="checkbox" name="genreOpt" value="Thriller"> Thriller</label>
+                <label><input type="checkbox" name="genreOpt" value="Romance"> Romance</label>
+            </div>
+
+            <input type="url" id="poster" placeholder="Poster Image URL (300x450 format)">
             <input type="url" id="downloadLink" placeholder="External Redirect Download Link">
             <button onclick="addMovie()">Upload Movie</button>
             <p id="statusMsg" style="margin-top: 10px; color: #00ff00;"></p>
@@ -64,15 +87,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // AAPKA FIREBASE CONFIG CODE YAHAN AYEGA
-            const firebaseConfig = {
-  apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
-  authDomain: "cineflix-96103.firebaseapp.com",
-  projectId: "cineflix-96103",
-  storageBucket: "cineflix-96103.firebasestorage.app",
-  messagingSenderId: "911831817405",
-  appId: "1:911831817405:web:cb0b86146b7e52742b6bd4"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
+          authDomain: "cineflix-96103.firebaseapp.com",
+          projectId: "cineflix-96103",
+          storageBucket: "cineflix-96103.firebasestorage.app",
+          messagingSenderId: "911831817405",
+          appId: "1:911831817405:web:cb0b86146b7e52742b6bd4"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -80,19 +102,25 @@
         function addMovie() {
             const title = document.getElementById('title').value;
             const year = document.getElementById('year').value;
-            const genre = document.getElementById('genre').value;
             const poster = document.getElementById('poster').value;
             const downloadLink = document.getElementById('downloadLink').value;
 
-            if(!title || !poster || !downloadLink) {
-                alert("Please fill all details!");
+            // Collect selected checkboxes as array
+            const selectedGenres = [];
+            const checkboxes = document.querySelectorAll('input[name="genreOpt"]:checked');
+            checkboxes.forEach((cb) => {
+                selectedGenres.push(cb.value);
+            });
+
+            if(!title || !poster || !downloadLink || selectedGenres.length === 0) {
+                alert("Please fill all details and select at least one genre!");
                 return;
             }
 
             db.collection("movies").add({
                 title: title,
                 year: year,
-                genre: genre,
+                genre: selectedGenres, // Saves as Array e.g. ["Action", "Sci-Fi"]
                 poster: poster,
                 downloadLink: downloadLink,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -102,6 +130,7 @@
                 document.getElementById('title').value = '';
                 document.getElementById('poster').value = '';
                 document.getElementById('downloadLink').value = '';
+                checkboxes.forEach(cb => cb.checked = false);
             })
             .catch((error) => {
                 alert("Error: " + error.message);
@@ -110,4 +139,3 @@
     </script>
 </body>
 </html>
-  
