@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Details</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo"><a href="index.html" style="color:#e50914; text-decoration:none;">🎬 CineFlix</a></div>
+    </header>
+
+    <main class="container" style="text-align: center; max-width: 600px; margin: 40px auto;">
+        <img id="detailPoster" src="" alt="Poster" style="width:100%; max-width:300px; border-radius:10px;">
+        <h1 id="detailTitle" style="margin-top:20px;"></h1>
+        <p id="detailMeta" style="color:#aaa; margin:10px 0;"></p>
+        
+        <div style="margin-top: 30px;">
+            <a id="detailDownloadBtn" href="#" target="_blank" class="download-btn" style="padding: 12px 20px; font-size: 18px;">⬇ Download Movie</a>
+        </div>
+    </main>
+
+    <script>
+        // Get Movie ID from URL (e.g. movie.html?id=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+
+        // Fetch movies from script.js data
+        if (movieId) {
+            // Read movie details from localStorage or shared array
+            const selectedMovie = JSON.parse(localStorage.getItem('selectedMovie'));
+            if (selectedMovie) {
+                document.getElementById('detailPoster').src = selectedMovie.poster;
+                document.getElementById('detailTitle').innerText = selectedMovie.title;
+                document.getElementById('detailMeta').innerText = selectedMovie.year + ' | ' + selectedMovie.genre;
+                document.getElementById('detailDownloadBtn').href = selectedMovie.downloadLink;
+            }
+        }
+    </script>
+</body>
+          </html>
