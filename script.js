@@ -1,30 +1,22 @@
-JavaScript
-// Sample Movie Data (Isme aap apni movies aur external download links add kar sakte hain)
 const movies = [
     {
-        title: "Interstellar",
-        year: "2014",
+        id: 1,
+        title: "Avatar 2",
+        year: "2022",
         genre: "Sci-Fi",
-        poster: "https://via.placeholder.com/300x450?text=Interstellar",
-        downloadLink: "https://external-download-site.com/file1" // External redirect link
+        poster: "https://m.media-amazon.com/images/M/MV5BYjhiNjBlODctY2ZiOC00YjVlLWFiNzAtNDJhNWTM2ZGEwI2XmXkEyXkFqcGdeQXVyMTEyMjM2NDc2._V1_.jpg",
+        downloadLink: "https://external-website-1.com/avatar2"
     },
     {
-        title: "The Dark Knight",
-        year: "2008",
+        id: 2,
+        title: "Jawan",
+        year: "2023",
         genre: "Action",
-        poster: "https://via.placeholder.com/300x450?text=Dark+Knight",
-        downloadLink: "https://external-download-site.com/file2"
-    },
-    {
-        title: "Inception",
-        year: "2010",
-        genre: "Sci-Fi",
-        poster: "https://via.placeholder.com/300x450?text=Inception",
-        downloadLink: "https://external-download-site.com/file3"
+        poster: "https://m.media-amazon.com/images/M/MV5BMmFiM2RjMjctNWU3Mi00MThmLThlOTUtMGIyOTUxOTU3M2VkXkEyXkFqcGdeQXVyODMyNDEyNjM@._V1_.jpg",
+        downloadLink: "https://external-website-2.com/jawan"
     }
 ];
 
-// Display Movies
 function displayMovies(movieList) {
     const container = document.getElementById('movieContainer');
     container.innerHTML = '';
@@ -37,21 +29,27 @@ function displayMovies(movieList) {
             <div class="movie-info">
                 <div class="movie-title">${movie.title}</div>
                 <div class="movie-meta">${movie.year} | ${movie.genre}</div>
-                <a href="${movie.downloadLink}" target="_blank" class="download-btn">⬇ Download</a>
+                <button onclick="openMovie(${movie.id})" class="download-btn">View & Download</button>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-// Live Search Functionality
+function openMovie(id) {
+    const selectedMovie = movies.find(m => m.id === id);
+    if (selectedMovie) {
+        localStorage.setItem('selectedMovie', JSON.stringify(selectedMovie));
+        window.location.href = `movie.html?id=${id}`;
+    }
+}
+
 function filterMovies() {
     const query = document.getElementById('searchInput').value.toLowerCase();
     const filtered = movies.filter(movie => movie.title.toLowerCase().includes(query));
     displayMovies(filtered);
 }
 
-// Genre Filter Functionality
 function filterGenre(genre) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
@@ -64,5 +62,4 @@ function filterGenre(genre) {
     }
 }
 
-// Initial Load
 displayMovies(movies);
