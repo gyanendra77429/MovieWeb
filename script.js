@@ -1,25 +1,37 @@
-const movies = [
-    {
-        id: 1,
-        title: "Mirzapur The Movie",
-        year: "2026",
-        genre: "Action, Crime, Drama, Thrill",
-        poster: "https://share.google/XgZJqPuG0JWxLAa3t",
-        downloadLink: "https://fast-dl.one/dl/1cc017"
-    },
-    {
-        id: 2,
-        title: "Jawan",
-        year: "2023",
-        genre: "Action",
-        poster: "https://m.media-amazon.com/images/M/MV5BMmFiM2RjMjctNWU3Mi00MThmLThlOTUtMGIyOTUxOTU3M2VkXkEyXkFqcGdeQXVyODMyNDEyNjM@._V1_.jpg",
-        downloadLink: "https://external-website-2.com/jawan"
-    }
-];
+// AAPKA FIREBASE CONFIG CODE YAHAN BHI AYEGA
+const firebaseConfig = {
+  apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
+  authDomain: "cineflix-96103.firebaseapp.com",
+  projectId: "cineflix-96103",
+  storageBucket: "cineflix-96103.firebasestorage.app",
+  messagingSenderId: "911831817405",
+  appId: "1:911831817405:web:cb0b86146b7e52742b6bd4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let allMovies = [];
+
+// Firebase se Movies Fetch Karna
+function loadMovies() {
+    db.collection("movies").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+        allMovies = [];
+        snapshot.forEach((doc) => {
+            allMovies.push({ id: doc.id, ...doc.data() });
+        });
+        displayMovies(allMovies);
+    });
+}
 
 function displayMovies(movieList) {
     const container = document.getElementById('movieContainer');
     container.innerHTML = '';
+
+    if (movieList.length === 0) {
+        container.innerHTML = '<p style="color:#aaa;">No movies found.</p>';
+        return;
+    }
 
     movieList.forEach(movie => {
         const card = document.createElement('div');
@@ -29,7 +41,7 @@ function displayMovies(movieList) {
             <div class="movie-info">
                 <div class="movie-title">${movie.title}</div>
                 <div class="movie-meta">${movie.year} | ${movie.genre}</div>
-                <button onclick="openMovie(${movie.id})" class="download-btn">View & Download</button>
+                <button onclick="openMovie('${movie.id}')" class="download-btn">View & Download</button>
             </div>
         `;
         container.appendChild(card);
@@ -37,7 +49,7 @@ function displayMovies(movieList) {
 }
 
 function openMovie(id) {
-    const selectedMovie = movies.find(m => m.id === id);
+    const selectedMovie = allMovies.find(m => m.id === id);
     if (selectedMovie) {
         localStorage.setItem('selectedMovie', JSON.stringify(selectedMovie));
         window.location.href = `movie.html?id=${id}`;
@@ -46,7 +58,7 @@ function openMovie(id) {
 
 function filterMovies() {
     const query = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = movies.filter(movie => movie.title.toLowerCase().includes(query));
+    const filtered = allMovies.filter(movie => movie.title.toLowerCase().includes(query));
     displayMovies(filtered);
 }
 
@@ -55,11 +67,13 @@ function filterGenre(genre) {
     event.target.classList.add('active');
 
     if (genre === 'all') {
-        displayMovies(movies);
+        displayMovies(allMovies);
     } else {
-        const filtered = movies.filter(movie => movie.genre === genre);
+        const filtered = allMovies.filter(movie => movie.genre === genre);
         displayMovies(filtered);
     }
 }
 
-displayMovies(movies);
+// Initial Load
+loadMovies();
+                         
