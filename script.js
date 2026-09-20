@@ -1,4 +1,3 @@
-// AAPKA FIREBASE CONFIG CODE YAHAN BHI AYEGA
 const firebaseConfig = {
   apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
   authDomain: "cineflix-96103.firebaseapp.com",
@@ -13,7 +12,6 @@ const db = firebase.firestore();
 
 let allMovies = [];
 
-// Firebase se Movies Fetch Karna
 function loadMovies() {
     db.collection("movies").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
         allMovies = [];
@@ -34,13 +32,16 @@ function displayMovies(movieList) {
     }
 
     movieList.forEach(movie => {
+        // Handle genre display (string vs array)
+        let genreText = Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre;
+
         const card = document.createElement('div');
         card.className = 'movie-card';
         card.innerHTML = `
             <img src="${movie.poster}" alt="${movie.title}">
             <div class="movie-info">
                 <div class="movie-title">${movie.title}</div>
-                <div class="movie-meta">${movie.year} | ${movie.genre}</div>
+                <div class="movie-meta">${movie.year} | ${genreText}</div>
                 <button onclick="openMovie('${movie.id}')" class="download-btn">View & Download</button>
             </div>
         `;
@@ -69,11 +70,17 @@ function filterGenre(genre) {
     if (genre === 'all') {
         displayMovies(allMovies);
     } else {
-        const filtered = allMovies.filter(movie => movie.genre === genre);
+        const filtered = allMovies.filter(movie => {
+            if (Array.isArray(movie.genre)) {
+                return movie.genre.includes(genre);
+            } else {
+                return movie.genre === genre;
+            }
+        });
         displayMovies(filtered);
     }
 }
 
 // Initial Load
 loadMovies();
-                         
+                      
