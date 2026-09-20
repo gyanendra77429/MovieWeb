@@ -1,11 +1,11 @@
 const movies = [
     {
         id: 1,
-        title: "Avatar 2",
-        year: "2022",
-        genre: "Sci-Fi",
+        title: "Mirzapur The Movie",
+        year: "2026",
+        genre: "Action, Crime, Drama, Thrill",
         poster: "https://m.media-amazon.com/images/M/MV5BYjhiNjBlODctY2ZiOC00YjVlLWFiNzAtNDJhNWTM2ZGEwI2XmXkEyXkFqcGdeQXVyMTEyMjM2NDc2._V1_.jpg",
-        downloadLink: "https://external-website-1.com/avatar2"
+        downloadLink: "https://fast-dl.one/dl/1cc017"
     },
     {
         id: 2,
