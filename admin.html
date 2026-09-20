@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineFlix - Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-form {
+            max-width: 500px;
+            margin: 30px auto;
+            background: #1f1f1f;
+            padding: 25px;
+            border-radius: 8px;
+        }
+        .admin-form input, .admin-form select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+        }
+        .admin-form button {
+            width: 100%;
+            padding: 12px;
+            background: #e50914;
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🎬 CineFlix Admin Panel</div>
+        <a href="index.html" style="color: #fff; text-decoration: none;">View Site</a>
+    </header>
+
+    <div class="container">
+        <div class="admin-form">
+            <h2>Add New Movie</h2>
+            <input type="text" id="title" placeholder="Movie Title (e.g. Avatar 2)">
+            <input type="text" id="year" placeholder="Release Year (e.g. 2024)">
+            <select id="genre">
+                <option value="Action">Action</option>
+                <option value="Sci-Fi">Sci-Fi</option>
+                <option value="Drama">Drama</option>
+                <option value="Horror">Horror</option>
+            </select>
+            <input type="url" id="poster" placeholder="Poster Image URL">
+            <input type="url" id="downloadLink" placeholder="External Redirect Download Link">
+            <button onclick="addMovie()">Upload Movie</button>
+            <p id="statusMsg" style="margin-top: 10px; color: #00ff00;"></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // AAPKA FIREBASE CONFIG CODE YAHAN AYEGA
+            const firebaseConfig = {
+  apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
+  authDomain: "cineflix-96103.firebaseapp.com",
+  projectId: "cineflix-96103",
+  storageBucket: "cineflix-96103.firebasestorage.app",
+  messagingSenderId: "911831817405",
+  appId: "1:911831817405:web:cb0b86146b7e52742b6bd4"
+};
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function addMovie() {
+            const title = document.getElementById('title').value;
+            const year = document.getElementById('year').value;
+            const genre = document.getElementById('genre').value;
+            const poster = document.getElementById('poster').value;
+            const downloadLink = document.getElementById('downloadLink').value;
+
+            if(!title || !poster || !downloadLink) {
+                alert("Please fill all details!");
+                return;
+            }
+
+            db.collection("movies").add({
+                title: title,
+                year: year,
+                genre: genre,
+                poster: poster,
+                downloadLink: downloadLink,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                document.getElementById('statusMsg').innerText = "Movie added successfully!";
+                document.getElementById('title').value = '';
+                document.getElementById('poster').value = '';
+                document.getElementById('downloadLink').value = '';
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
+  
