@@ -50,11 +50,10 @@ function displayMovies(movieList) {
 }
 
 function openMovie(id) {
-    const selectedMovie = allMovies.find(m => m.id === id);
-    if (selectedMovie) {
-        localStorage.setItem('selectedMovie', JSON.stringify(selectedMovie));
-        window.location.href = `movie.html?id=${id}`;
+    function openMovie(id) {
+    window.location.href = `movie.html?id=${id}`;
     }
+  }
 }
 
 function filterMovies() {
