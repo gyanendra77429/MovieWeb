@@ -28,21 +28,23 @@
             box-sizing: border-box;
         }
         .genre-checkboxes {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 10px;
             margin: 10px 0 15px 0;
             background: #2a2a2a;
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
         }
         .genre-checkboxes label {
-            font-size: 14px;
+            font-size: 13px;
             color: #ddd;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         .admin-form button {
             width: 100%;
@@ -55,7 +57,7 @@
             border-radius: 5px;
             margin-top: 10px;
         }
-        /* Movie List & Delete Styling */
+        /* Movie List Styling */
         .movie-list-item {
             display: flex;
             align-items: center;
@@ -72,17 +74,46 @@
             color: #888;
             font-size: 13px;
         }
-        .delete-btn {
-            background: #ff3333;
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .edit-btn {
+            background: #ff9900;
             color: white;
             border: none;
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
         }
-        .delete-btn:hover {
-            background: #cc0000;
+        .delete-btn {
+            background: #ff3333;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* Edit Modal Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1f1f1f;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -99,19 +130,29 @@
             <input type="text" id="title" placeholder="Movie Title (e.g. Avatar 2)">
             <input type="text" id="year" placeholder="Release Year (e.g. 2024)">
             
-            <label style="color:#aaa; font-size:14px;">Select Genres:</label>
+            <label style="color:#aaa; font-size:14px;">Select Genres (A to Z):</label>
             <div class="genre-checkboxes">
                 <label><input type="checkbox" name="genreOpt" value="Action"> Action</label>
-                <label><input type="checkbox" name="genreOpt" value="Sci-Fi"> Sci-Fi</label>
-                <label><input type="checkbox" name="genreOpt" value="Drama"> Drama</label>
-                <label><input type="checkbox" name="genreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="genreOpt" value="Adventure"> Adventure</label>
+                <label><input type="checkbox" name="genreOpt" value="Animation"> Animation</label>
+                <label><input type="checkbox" name="genreOpt" value="Biography"> Biography</label>
                 <label><input type="checkbox" name="genreOpt" value="Comedy"> Comedy</label>
-                <label><input type="checkbox" name="genreOpt" value="Thriller"> Thriller</label>
-                <label><input type="checkbox" name="genreOpt" value="Romance"> Romance</label>
+                <label><input type="checkbox" name="genreOpt" value="Crime"> Crime</label>
+                <label><input type="checkbox" name="genreOpt" value="Documentary"> Documentary</label>
+                <label><input type="checkbox" name="genreOpt" value="Drama"> Drama</label>
                 <label><input type="checkbox" name="genreOpt" value="Family"> Family</label>
-                <label><input type="checkbox" name="genreOpt" value="crime"> crime</label>
-                <label><input type="checkbox" name="genreOpt" value="Bollywood"> Bollywood</label>
-                <label><input type="checkbox" name="genreOpt" value="Hollywood"> Hollywood</label>
+                <label><input type="checkbox" name="genreOpt" value="Fantasy"> Fantasy</label>
+                <label><input type="checkbox" name="genreOpt" value="History"> History</label>
+                <label><input type="checkbox" name="genreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="genreOpt" value="Music"> Music</label>
+                <label><input type="checkbox" name="genreOpt" value="Mystery"> Mystery</label>
+                <label><input type="checkbox" name="genreOpt" value="Romance"> Romance</label>
+                <label><input type="checkbox" name="genreOpt" value="Sci-Fi"> Sci-Fi</label>
+                <label><input type="checkbox" name="genreOpt" value="Sports"> Sports</label>
+
+                <label><input type="checkbox" name="genreOpt" value="Thriller"> Thriller</label>
+                <label><input type="checkbox" name="genreOpt" value="War"> War</label>
+                <label><input type="checkbox" name="genreOpt" value="Western"> Western</label>
             </div>
 
             <input type="url" id="poster" placeholder="Poster Image URL (300x450 format)">
@@ -120,12 +161,52 @@
             <p id="statusMsg" style="margin-top: 10px; color: #00ff00;"></p>
         </div>
 
-        <!-- Manage / Delete Movies Section -->
+        <!-- Manage Movies Section -->
         <div style="background: #1f1f1f; padding: 25px; border-radius: 8px;">
-            <h2 style="color: #fff; margin-bottom: 15px;">Manage & Delete Movies</h2>
+            <h2 style="color: #fff; margin-bottom: 15px;">Manage Movies (Edit / Delete)</h2>
             <div id="adminMovieList">
                 <p style="color: #aaa;">Loading uploaded movies...</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Edit Movie Modal Popup -->
+    <div id="editModal" class="modal">
+        <div class="modal-content admin-form" style="margin:0;">
+            <h2 style="color:#fff;">Edit Movie Details</h2>
+            <input type="hidden" id="editMovieId">
+            <input type="text" id="editTitle" placeholder="Movie Title">
+            <input type="text" id="editYear" placeholder="Release Year">
+            
+            <label style="color:#aaa; font-size:14px;">Select Genres (A to Z):</label>
+            <div class="genre-checkboxes">
+                <label><input type="checkbox" name="editGenreOpt" value="Action"> Action</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Adventure"> Adventure</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Animation"> Animation</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Biography"> Biography</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Comedy"> Comedy</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Crime"> Crime</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Documentary"> Documentary</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Drama"> Drama</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Family"> Family</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Fantasy"> Fantasy</label>
+                <label><input type="checkbox" name="editGenreOpt" value="History"> History</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Music"> Music</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Mystery"> Mystery</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Romance"> Romance</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Sci-Fi"> Sci-Fi</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Sports"> Sports</label>
+
+                <label><input type="checkbox" name="editGenreOpt" value="Thriller"> Thriller</label>
+                <label><input type="checkbox" name="editGenreOpt" value="War"> War</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Western"> Western</label>
+            </div>
+
+            <input type="url" id="editPoster" placeholder="Poster Image URL">
+            <input type="url" id="editDownloadLink" placeholder="Download Link">
+            <button onclick="saveMovieEdit()" style="background:#008cba;">Save Changes</button>
+            <button onclick="closeEditModal()" style="background:#555; margin-top:5px;">Cancel</button>
         </div>
     </div>
 
@@ -146,6 +227,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        let allMoviesData = {};
+
         // 1. Add Movie
         function addMovie() {
             const title = document.getElementById('title').value;
@@ -154,8 +237,7 @@
             const downloadLink = document.getElementById('downloadLink').value;
 
             const selectedGenres = [];
-            const checkboxes = document.querySelectorAll('input[name="genreOpt"]:checked');
-            checkboxes.forEach((cb) => {
+            document.querySelectorAll('input[name="genreOpt"]:checked').forEach((cb) => {
                 selectedGenres.push(cb.value);
             });
 
@@ -178,18 +260,17 @@
                 document.getElementById('year').value = '';
                 document.getElementById('poster').value = '';
                 document.getElementById('downloadLink').value = '';
-                checkboxes.forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="genreOpt"]').forEach(cb => cb.checked = false);
             })
-            .catch((error) => {
-                alert("Error: " + error.message);
-            });
+            .catch((error) => alert("Error: " + error.message));
         }
 
-        // 2. Fetch and Display Movies with Delete Button
+        // 2. Fetch & Display Movies
         function loadAdminMovies() {
             db.collection("movies").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
                 const listContainer = document.getElementById('adminMovieList');
                 listContainer.innerHTML = '';
+                allMoviesData = {};
 
                 if(snapshot.empty) {
                     listContainer.innerHTML = '<p style="color:#aaa;">No movies uploaded yet.</p>';
@@ -198,38 +279,461 @@
 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
+                    allMoviesData[doc.id] = data;
                     const genreText = Array.isArray(data.genre) ? data.genre.join(', ') : data.genre;
 
                     const item = document.createElement('div');
                     item.className = 'movie-list-item';
                     item.innerHTML = `
                         <div class="movie-info-text">
-                            <strong>${data.title}</strong> (${data.year}) 
+                            <strong>${data.title}</strong> (${data.year || 'N/A'}) 
                             <br><span>${genreText}</span>
                         </div>
-                        <button class="delete-btn" onclick="deleteMovie('${doc.id}', '${data.title}')">Delete</button>
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="openEditModal('${doc.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteMovie('${doc.id}', '${data.title}')">Delete</button>
+                        </div>
                     `;
                     listContainer.appendChild(item);
                 });
             });
         }
 
-        // 3. Delete Movie Function
+        // 3. Open Edit Modal
+        function openEditModal(id) {
+            const movie = allMoviesData[id];
+            if(!movie) return;
+
+            document.getElementById('editMovieId').value = id;
+            document.getElementById('editTitle').value = movie.title || '';
+            document.getElementById('editYear').value = movie.year || '';
+            document.getElementById('editPoster').value = movie.poster || '';
+            document.getElementById('editDownloadLink').value = movie.downloadLink || '';
+
+            const savedGenres = Array.isArray(movie.genre) ? movie.genre : [movie.genre];
+            document.querySelectorAll('input[name="editGenreOpt"]').forEach(cb => {
+                cb.checked = savedGenres.includes(cb.value);
+            });
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // 4. Save Edited Changes to Firebase
+        function saveMovieEdit() {
+            const id = document.getElementById('editMovieId').value;
+            const title = document.getElementById('editTitle').value;
+            const year = document.getElementById('editYear').value;
+            const poster = document.getElementById('editPoster').value;
+            const downloadLink = document.getElementById('editDownloadLink').value;
+
+            const selectedGenres = [];
+            document.querySelectorAll('input[name="editGenreOpt"]:checked').forEach((cb) => {
+                selectedGenres.push(cb.value);
+            });
+
+            if(!title || !poster || !downloadLink || selectedGenres.length === 0) {
+                alert("All fields and at least one genre are required!");
+                return;
+            }
+
+            db.collection("movies").doc(id).update({
+                title: title,
+                year: year,
+                genre: selectedGenres,
+                poster: poster,
+                downloadLink: downloadLink
+            })
+            .then(() => {
+                alert("Movie updated successfully!");
+                closeEditModal();
+            })
+            .catch((error) => alert("Update error: " + error.message));
+        }
+
+        // 5. Delete Movie
         function deleteMovie(id, title) {
             if (confirm(`Kya aap sach me "${title}" ko delete karna chahte hain?`)) {
                 db.collection("movies").doc(id).delete()
-                .then(() => {
-                    alert("Movie deleted successfully!");
-                })
-                .catch((error) => {
-                    alert("Delete karne me error aaya: " + error.message);
-                });
+                .then(() => alert("Movie deleted successfully!"))
+                .catch((error) => alert("Delete error: " + error.message));
             }
         }
 
-        // Initial Load
         loadAdminMovies();
     </script>
 </body>
-                           </html>
+    </html>
+                           <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineFlix - Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .admin-form {
+            background: #1f1f1f;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .admin-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .genre-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            margin: 10px 0 15px 0;
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .genre-checkboxes label {
+            font-size: 13px;
+            color: #ddd;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .admin-form button {
+            width: 100%;
+            padding: 12px;
+            background: #e50914;
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Movie List Styling */
+        .movie-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2a2a2a;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        .movie-info-text {
+            color: #fff;
+        }
+        .movie-info-text span {
+            color: #888;
+            font-size: 13px;
+        }
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .edit-btn {
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .delete-btn {
+            background: #ff3333;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* Edit Modal Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1f1f1f;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🎬 CineFlix Admin Panel</div>
+        <a href="index.html" style="color: #fff; text-decoration: none;">View Site</a>
+    </header>
+
+    <div class="admin-container">
+        <!-- Add Movie Form -->
+        <div class="admin-form">
+            <h2>Add New Movie</h2>
+            <input type="text" id="title" placeholder="Movie Title (e.g. Avatar 2)">
+            <input type="text" id="year" placeholder="Release Year (e.g. 2024)">
+            
+            <label style="color:#aaa; font-size:14px;">Select Genres (A to Z):</label>
+            <div class="genre-checkboxes">
+                <label><input type="checkbox" name="genreOpt" value="Action"> Action</label>
+                <label><input type="checkbox" name="genreOpt" value="Adventure"> Adventure</label>
+                <label><input type="checkbox" name="genreOpt" value="Animation"> Animation</label>
+                <label><input type="checkbox" name="genreOpt" value="Biography"> Biography</label>
+                <label><input type="checkbox" name="genreOpt" value="Comedy"> Comedy</label>
+                <label><input type="checkbox" name="genreOpt" value="Crime"> Crime</label>
+                <label><input type="checkbox" name="genreOpt" value="Documentary"> Documentary</label>
+                <label><input type="checkbox" name="genreOpt" value="Drama"> Drama</label>
+                <label><input type="checkbox" name="genreOpt" value="Family"> Family</label>
+                <label><input type="checkbox" name="genreOpt" value="Fantasy"> Fantasy</label>
+                <label><input type="checkbox" name="genreOpt" value="History"> History</label>
+                <label><input type="checkbox" name="genreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="genreOpt" value="Music"> Music</label>
+                <label><input type="checkbox" name="genreOpt" value="Mystery"> Mystery</label>
+                <label><input type="checkbox" name="genreOpt" value="Romance"> Romance</label>
+                <label><input type="checkbox" name="genreOpt" value="Sci-Fi"> Sci-Fi</label>
+                <label><input type="checkbox" name="genreOpt" value="Sports"> Sports</label>
+
+                <label><input type="checkbox" name="genreOpt" value="Thriller"> Thriller</label>
+                <label><input type="checkbox" name="genreOpt" value="War"> War</label>
+                <label><input type="checkbox" name="genreOpt" value="Western"> Western</label>
+            </div>
+
+            <input type="url" id="poster" placeholder="Poster Image URL (300x450 format)">
+            <input type="url" id="downloadLink" placeholder="External Redirect Download Link">
+            <button onclick="addMovie()">Upload Movie</button>
+            <p id="statusMsg" style="margin-top: 10px; color: #00ff00;"></p>
+        </div>
+
+        <!-- Manage Movies Section -->
+        <div style="background: #1f1f1f; padding: 25px; border-radius: 8px;">
+            <h2 style="color: #fff; margin-bottom: 15px;">Manage Movies (Edit / Delete)</h2>
+            <div id="adminMovieList">
+                <p style="color: #aaa;">Loading uploaded movies...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Movie Modal Popup -->
+    <div id="editModal" class="modal">
+        <div class="modal-content admin-form" style="margin:0;">
+            <h2 style="color:#fff;">Edit Movie Details</h2>
+            <input type="hidden" id="editMovieId">
+            <input type="text" id="editTitle" placeholder="Movie Title">
+            <input type="text" id="editYear" placeholder="Release Year">
+            
+            <label style="color:#aaa; font-size:14px;">Select Genres (A to Z):</label>
+            <div class="genre-checkboxes">
+                <label><input type="checkbox" name="editGenreOpt" value="Action"> Action</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Adventure"> Adventure</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Animation"> Animation</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Biography"> Biography</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Comedy"> Comedy</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Crime"> Crime</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Documentary"> Documentary</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Drama"> Drama</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Family"> Family</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Fantasy"> Fantasy</label>
+                <label><input type="checkbox" name="editGenreOpt" value="History"> History</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Horror"> Horror</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Music"> Music</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Mystery"> Mystery</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Romance"> Romance</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Sci-Fi"> Sci-Fi</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Sports"> Sports</label>
+
+                <label><input type="checkbox" name="editGenreOpt" value="Thriller"> Thriller</label>
+                <label><input type="checkbox" name="editGenreOpt" value="War"> War</label>
+                <label><input type="checkbox" name="editGenreOpt" value="Western"> Western</label>
+            </div>
+
+            <input type="url" id="editPoster" placeholder="Poster Image URL">
+            <input type="url" id="editDownloadLink" placeholder="Download Link">
+            <button onclick="saveMovieEdit()" style="background:#008cba;">Save Changes</button>
+            <button onclick="closeEditModal()" style="background:#555; margin-top:5px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCRRiS5R-os-NlLvYwsihU4QJ3zyf0zfBk",
+          authDomain: "cineflix-96103.firebaseapp.com",
+          projectId: "cineflix-96103",
+          storageBucket: "cineflix-96103.firebasestorage.app",
+          messagingSenderId: "911831817405",
+          appId: "1:911831817405:web:cb0b86146b7e52742b6bd4"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let allMoviesData = {};
+
+        // 1. Add Movie
+        function addMovie() {
+            const title = document.getElementById('title').value;
+            const year = document.getElementById('year').value;
+            const poster = document.getElementById('poster').value;
+            const downloadLink = document.getElementById('downloadLink').value;
+
+            const selectedGenres = [];
+            document.querySelectorAll('input[name="genreOpt"]:checked').forEach((cb) => {
+                selectedGenres.push(cb.value);
+            });
+
+            if(!title || !poster || !downloadLink || selectedGenres.length === 0) {
+                alert("Please fill all details and select at least one genre!");
+                return;
+            }
+
+            db.collection("movies").add({
+                title: title,
+                year: year,
+                genre: selectedGenres,
+                poster: poster,
+                downloadLink: downloadLink,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                document.getElementById('statusMsg').innerText = "Movie added successfully!";
+                document.getElementById('title').value = '';
+                document.getElementById('year').value = '';
+                document.getElementById('poster').value = '';
+                document.getElementById('downloadLink').value = '';
+                document.querySelectorAll('input[name="genreOpt"]').forEach(cb => cb.checked = false);
+            })
+            .catch((error) => alert("Error: " + error.message));
+        }
+
+        // 2. Fetch & Display Movies
+        function loadAdminMovies() {
+            db.collection("movies").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+                const listContainer = document.getElementById('adminMovieList');
+                listContainer.innerHTML = '';
+                allMoviesData = {};
+
+                if(snapshot.empty) {
+                    listContainer.innerHTML = '<p style="color:#aaa;">No movies uploaded yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    allMoviesData[doc.id] = data;
+                    const genreText = Array.isArray(data.genre) ? data.genre.join(', ') : data.genre;
+
+                    const item = document.createElement('div');
+                    item.className = 'movie-list-item';
+                    item.innerHTML = `
+                        <div class="movie-info-text">
+                            <strong>${data.title}</strong> (${data.year || 'N/A'}) 
+                            <br><span>${genreText}</span>
+                        </div>
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="openEditModal('${doc.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteMovie('${doc.id}', '${data.title}')">Delete</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+            });
+        }
+
+        // 3. Open Edit Modal
+        function openEditModal(id) {
+            const movie = allMoviesData[id];
+            if(!movie) return;
+
+            document.getElementById('editMovieId').value = id;
+            document.getElementById('editTitle').value = movie.title || '';
+            document.getElementById('editYear').value = movie.year || '';
+            document.getElementById('editPoster').value = movie.poster || '';
+            document.getElementById('editDownloadLink').value = movie.downloadLink || '';
+
+            const savedGenres = Array.isArray(movie.genre) ? movie.genre : [movie.genre];
+            document.querySelectorAll('input[name="editGenreOpt"]').forEach(cb => {
+                cb.checked = savedGenres.includes(cb.value);
+            });
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // 4. Save Edited Changes to Firebase
+        function saveMovieEdit() {
+            const id = document.getElementById('editMovieId').value;
+            const title = document.getElementById('editTitle').value;
+            const year = document.getElementById('editYear').value;
+            const poster = document.getElementById('editPoster').value;
+            const downloadLink = document.getElementById('editDownloadLink').value;
+
+            const selectedGenres = [];
+            document.querySelectorAll('input[name="editGenreOpt"]:checked').forEach((cb) => {
+                selectedGenres.push(cb.value);
+            });
+
+            if(!title || !poster || !downloadLink || selectedGenres.length === 0) {
+                alert("All fields and at least one genre are required!");
+                return;
+            }
+
+            db.collection("movies").doc(id).update({
+                title: title,
+                year: year,
+                genre: selectedGenres,
+                poster: poster,
+                downloadLink: downloadLink
+            })
+            .then(() => {
+                alert("Movie updated successfully!");
+                closeEditModal();
+            })
+            .catch((error) => alert("Update error: " + error.message));
+        }
+
+        // 5. Delete Movie
+        function deleteMovie(id, title) {
+            if (confirm(`Kya aap sach me "${title}" ko delete karna chahte hain?`)) {
+                db.collection("movies").doc(id).delete()
+                .then(() => alert("Movie deleted successfully!"))
+                .catch((error) => alert("Delete error: " + error.message));
+            }
+        }
+
+        loadAdminMovies();
+    </script>
+</body>
+    </html>
                            
