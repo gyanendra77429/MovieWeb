@@ -32,7 +32,6 @@ function displayMovies(movieList) {
     }
 
     movieList.forEach(movie => {
-        // Handle genre display (string vs array)
         let genreText = Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre;
 
         const card = document.createElement('div');
@@ -49,11 +48,9 @@ function displayMovies(movieList) {
     });
 }
 
+// Fixed function: Removed duplicate nested function
 function openMovie(id) {
-    function openMovie(id) {
     window.location.href = `movie.html?id=${id}`;
-    }
-  }
 }
 
 function filterMovies() {
@@ -64,7 +61,7 @@ function filterMovies() {
 
 function filterGenre(genre) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event) event.target.classList.add('active');
 
     if (genre === 'all') {
         displayMovies(allMovies);
@@ -82,4 +79,3 @@ function filterGenre(genre) {
 
 // Initial Load
 loadMovies();
-                      
